@@ -53,7 +53,21 @@ func main() {
 	if err := solid.Blit(nil, surface, nil); err != nil {
 		log.Fatalf("Could not put text onto surface: %v\n", err)
 	}
-	window.UpdateSurface()
+	if err := window.UpdateSurface(); err != nil {
+		log.Fatalf("Could not update window surface: %v\n", err)
+	}
 
-	sdl.Delay(3000)
+loop:
+	for {
+		switch event := sdl.WaitEvent().(type) {
+		case *sdl.QuitEvent:
+			break loop
+		case *sdl.KeyDownEvent:
+			if event.Keysym.Sym == sdl.K_ESCAPE {
+				break loop
+			}
+		default:
+
+		}
+	}
 }
