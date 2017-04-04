@@ -13,6 +13,12 @@ const (
 	windowHeight = 600
 )
 
+type Scene interface {
+	Init(r *sdl.Renderer) error
+	Render(r *sdl.Renderer) error
+	Destroy()
+}
+
 var (
 	window   *sdl.Window
 	renderer *sdl.Renderer
@@ -28,59 +34,37 @@ func main() {
 		log.Fatalf("Could not initialize SDL_ttf: %v\n", err)
 	}
 
-	window, renderer, err := sdl.CreateWindowAndRenderer(windowWidth, windowHeight, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow(windowTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
+		windowWidth, windowHeight, sdl.WINDOW_SHOWN)
 	if err != nil {
 		log.Fatalf("Could not create window: %v\n", err)
 	}
-	// defer renderer.Destroy()
 	defer window.Destroy()
 
-	font, err := ttf.OpenFont("res/ptsansb.ttf", 40)
+	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED|sdl.RENDERER_PRESENTVSYNC)
 	if err != nil {
-		log.Fatalf("Could not open font: %v\n", err)
+		log.Fatalf("Could not create renderer: %v", err)
 	}
-	//defer font.Close()
-	defer ttf.Quit()
 
-	message, err := font.RenderUTF8_Solid(windowTitle, sdl.Color{A: 255, R: 255, G: 255, B: 255})
-	if err != nil {
-		log.Fatalf("Could not render text: %v\n", err)
+	var t Scene = &TitleScene{}
+	defer t.Destroy()
+	if err = t.Init(renderer); err != nil {
+		log.Fatalf("Could not init title scene: %v", err)
 	}
-	defer message.Free()
-
-	surface, err := window.GetSurface()
-	if err != nil {
-		log.Fatalf("Could not get window surface: %v\n", err)
-	}
-	texture, err := renderer.CreateTextureFromSurface(message)
-	if err != nil {
-		log.Fatalf("Could not create texture: %v\n", err)
-	}
-	defer surface.Free()
-	defer texture.Destroy()
-
-	renderer.SetDrawColor(255, 125, 0, 255)
-
-	if err := renderer.Clear(); err != nil {
-		log.Fatalf("Could not clear rendering target: %v", err)
-	}
-	renderer.Copy(texture, nil, &sdl.Rect{X: 10, Y: windowHeight / 4, W: windowWidth - 20, H: windowHeight / 2})
-	// renderer.CopyEx(texture, nil, nil, 0, &sdl.Point{100, 100}, sdl.FLIP_NONE)
-	renderer.Present()
-
-	// if err := window.UpdateSurface(); err != nil {
-	// 	log.Fatalf("Could not update window surface: %v\n", err)
-	// }
 
 loop:
 	for {
-		switch event := sdl.WaitEvent().(type) {
+		switch event := sdl.PollEvent().(type) {
 		case *sdl.QuitEvent:
 			break loop
 		case *sdl.KeyDownEvent:
-			if event.Keysym.Sym == sdl.K_ESCAPE {
+			if event.Keysym.Sym == sdl.K_ESCAPE || event.Keysym.Sym == 'q' {
 				break loop
 			}
 		}
+		if err = t.Render(renderer); err != nil {
+			log.Fatalf("Could not render scene: %v", err)
+		}
+		renderer.Present()
 	}
 }
