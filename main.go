@@ -9,8 +9,8 @@ import (
 
 const (
 	windowTitle  = "TANK & GUN"
-	windowWidth  = 200
-	windowHeight = 150
+	windowWidth  = 800
+	windowHeight = 600
 )
 
 type Scene interface {

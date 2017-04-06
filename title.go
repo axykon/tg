@@ -16,8 +16,17 @@ type TitleScene struct {
 
 const (
 	fontFile = "res/Go-Bold.ttf"
-	fontSize = 80
+	fontSize = 120
 )
+
+var (
+	menu = [...]menuItem{{"Play", "play"}, {"Quit", "quit"}}
+)
+
+type menuItem struct {
+	label  string
+	action string
+}
 
 var (
 	fgColor = sdl.Color{A: 255, R: 123, G: 123, B: 255}
@@ -25,6 +34,9 @@ var (
 
 // Init initializes resources
 func (ts *TitleScene) Init(renderer *sdl.Renderer) error {
+	for _, i := range menu {
+		log.Printf("%s -> %s", i.label, i.action)
+	}
 	return nil
 }
 
@@ -66,11 +78,14 @@ func createTitle(renderer *sdl.Renderer) (*sdl.Texture, error) {
 	}
 	defer font.Close()
 
-	if err = renderer.SetDrawColor(randomColor(), randomColor(), randomColor(), fgColor.A); err != nil {
+	r, g, b := randomColor(), randomColor(), randomColor()
+	r1, g1, b1 := 255-r, 255-g, 255-b
+
+	if err = renderer.SetDrawColor(r, g, b, fgColor.A); err != nil {
 		return nil, fmt.Errorf("Could not set draw color: %v", err)
 	}
 
-	surface, err := font.RenderUTF8_Blended("Tank & Gun", sdl.Color{A: 255, R: randomColor(), G: randomColor(), B: randomColor()})
+	surface, err := font.RenderUTF8_Blended("Tank & Gun", sdl.Color{A: 255, R: r1, G: g1, B: b1})
 	if err != nil {
 		return nil, fmt.Errorf("Could not render font: %v", err)
 	}
