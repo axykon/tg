@@ -9,13 +9,14 @@ import (
 
 const (
 	windowTitle  = "TANK & GUN"
-	windowWidth  = 800
-	windowHeight = 600
+	windowWidth  = 200
+	windowHeight = 150
 )
 
 type Scene interface {
 	Init(r *sdl.Renderer) error
 	Render(r *sdl.Renderer) error
+	HandleEvent(event *sdl.Event)
 	Destroy()
 }
 
@@ -54,7 +55,8 @@ func main() {
 
 loop:
 	for {
-		switch event := sdl.PollEvent().(type) {
+		event := sdl.PollEvent()
+		switch event := event.(type) {
 		case *sdl.QuitEvent:
 			break loop
 		case *sdl.KeyDownEvent:
@@ -62,6 +64,7 @@ loop:
 				break loop
 			}
 		}
+		t.HandleEvent(&event)
 		if err = t.Render(renderer); err != nil {
 			log.Fatalf("Could not render scene: %v", err)
 		}
