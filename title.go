@@ -64,7 +64,8 @@ func (ts *TitleScene) Render(renderer *sdl.Renderer) error {
 		return fmt.Errorf("Could not clear target: %v", err)
 	}
 
-	if err := renderer.Copy(ts.title, nil, &sdl.Rect{X: 10, Y: windowHeight / 4, W: windowWidth - 20, H: windowHeight / 2}); err != nil {
+	if err := renderer.Copy(ts.title, nil, &sdl.Rect{X: 10, Y: int32(windowHeight) / 4,
+		W: int32(windowWidth) - 20, H: int32(windowHeight) / 2}); err != nil {
 		return fmt.Errorf("Could not copy texture: %v", err)
 	}
 

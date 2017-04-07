@@ -2,15 +2,15 @@ package main
 
 import (
 	"log"
+	"os"
+	"strings"
 
 	"github.com/veandco/go-sdl2/sdl"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 const (
-	windowTitle  = "TANK & GUN"
-	windowWidth  = 800
-	windowHeight = 600
+	windowTitle = "Tank & Gun"
 )
 
 type Scene interface {
@@ -21,11 +21,20 @@ type Scene interface {
 }
 
 var (
-	window   *sdl.Window
-	renderer *sdl.Renderer
+	window                    *sdl.Window
+	renderer                  *sdl.Renderer
+	windowWidth, windowHeight int
 )
 
 func main() {
+	if hostname, err := os.Hostname(); err != nil {
+		log.Fatalf("Could not get host name: %v", err)
+	} else if strings.HasPrefix(hostname, "w") {
+		windowWidth, windowHeight = 200, 140
+	} else {
+		windowWidth, windowHeight = 800, 600
+	}
+
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		log.Fatalf("Could not initialize SDL: %v\n", err)
 	}
