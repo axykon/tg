@@ -14,7 +14,6 @@ type TitleScene struct {
 
 const (
 	fontFile = "res/Go-Bold.ttf"
-	fontSize = 120
 )
 
 var (
@@ -33,7 +32,13 @@ type menuItem struct {
 
 // Init initializes resources
 func (ts *TitleScene) Init(renderer *sdl.Renderer) error {
-	var err error
+	var (
+		err      error
+		fontSize int
+	)
+
+	fontSize = windowHeight / (len(menu) + 1)
+
 	font, err = ttf.OpenFont(fontFile, fontSize)
 	if err != nil {
 		return fmt.Errorf("Could not open font %s: %v", fontFile, err)
@@ -65,7 +70,7 @@ func (ts *TitleScene) Render(renderer *sdl.Renderer) error {
 		return fmt.Errorf("Could not clear target: %v", err)
 	}
 
-	y := 50
+	y := 0
 
 	for i, item := range menu {
 		var itemColor sdl.Color
@@ -91,7 +96,7 @@ func (ts *TitleScene) Render(renderer *sdl.Renderer) error {
 
 		renderer.Copy(texture, nil, &sdl.Rect{X: (int32(windowWidth) - w) / 2, Y: int32(y), W: w, H: h})
 
-		y = y + int(h) + 20
+		y = y + int(h) // + 20
 
 	}
 
