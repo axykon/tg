@@ -42,13 +42,16 @@ func (ts *TitleScene) Init(renderer *sdl.Renderer) error {
 	ts.menu = []menuItem{{"Play", "play"}, {"Quit", "quit"}, {"Options", "options"}}
 	ts.menuTextures = make([]*sdl.Texture, len(ts.menu))
 
-	fontSize = windowHeight / (len(ts.menu) + 1)
+	fontSize = int(float64(windowHeight) / float64(len(ts.menu)) * 0.84)
+	log.Println("Font size:", fontSize)
 
 	font, err := ttf.OpenFont(fontFile, fontSize)
 	if err != nil {
 		return fmt.Errorf("Could not open font %s: %v", fontFile, err)
 	}
 	defer font.Close()
+
+	log.Println("Font height:", font.Height())
 
 	for i, item := range ts.menu {
 
@@ -57,6 +60,8 @@ func (ts *TitleScene) Init(renderer *sdl.Renderer) error {
 			return fmt.Errorf("Could not render font: %v", err)
 		}
 		defer surface.Free()
+
+		log.Printf("Label %s height is %d", item.label, surface.H)
 
 		//TODO: extract into a function
 		texture, err := renderer.CreateTextureFromSurface(surface)
