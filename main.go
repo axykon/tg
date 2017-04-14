@@ -14,19 +14,20 @@ const (
 )
 
 type Scene interface {
-	Init(r *sdl.Renderer) error
-	Render(r *sdl.Renderer) error
+	Init() error
+	Render() error
 	HandleEvent(event *sdl.Event)
 	Destroy()
 }
 
 var (
 	window                    *sdl.Window
-	renderer                  *sdl.Renderer
 	windowWidth, windowHeight int
 )
 
 func main() {
+	var err error
+
 	if hostname, err := os.Hostname(); err != nil {
 		log.Fatalf("Could not get host name: %v", err)
 	} else if strings.HasPrefix(hostname, "w") {
@@ -35,16 +36,16 @@ func main() {
 		windowWidth, windowHeight = 800, 600
 	}
 
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
+	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		log.Fatalf("Could not initialize SDL: %v\n", err)
 	}
 	defer sdl.Quit()
 
-	if err := ttf.Init(); err != nil {
+	if err = ttf.Init(); err != nil {
 		log.Fatalf("Could not initialize SDL_ttf: %v\n", err)
 	}
 
-	window, err := sdl.CreateWindow(windowTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
+	window, err = sdl.CreateWindow(windowTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
 		windowWidth, windowHeight, sdl.WINDOW_SHOWN)
 	if err != nil {
 		log.Fatalf("Could not create window: %v\n", err)
@@ -58,7 +59,7 @@ func main() {
 
 	var t Scene = &TitleScene{}
 	defer t.Destroy()
-	if err = t.Init(renderer); err != nil {
+	if err = t.Init(); err != nil {
 		log.Fatalf("Could not init title scene: %v", err)
 	}
 
@@ -74,7 +75,7 @@ loop:
 			}
 		}
 		t.HandleEvent(&event)
-		if err = t.Render(renderer); err != nil {
+		if err = t.Render(); err != nil {
 			log.Fatalf("Could not render scene: %v", err)
 		}
 		renderer.Present()

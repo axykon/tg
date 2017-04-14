@@ -31,13 +31,18 @@ type menuItem struct {
 }
 
 // Init initializes resources
-func (ts *TitleScene) Init(renderer *sdl.Renderer) error {
-	origTarget := renderer.GetRenderTarget()
+func (ts *TitleScene) Init() (err error) {
+	renderer, err := window.GetRenderer()
+	if err != nil {
+		return fmt.Errorf("Could not get renderer: %v", err)
+	}
 
-	var (
-		err      error
-		fontSize int
-	)
+	origTarget := renderer.GetRenderTarget()
+	defer func() {
+		err = renderer.SetRenderTarget(origTarget)
+	}()
+
+	var fontSize int
 
 	ts.menu = []menuItem{{"Play", "play"}, {"Quit", "quit"}, {"Options", "options"}}
 	ts.menuTextures = make([]*sdl.Texture, len(ts.menu))
@@ -92,10 +97,7 @@ func (ts *TitleScene) Init(renderer *sdl.Renderer) error {
 
 	}
 
-	renderer.SetRenderTarget(origTarget)
-
 	return nil
-
 }
 
 // HandleEvent handles events
@@ -113,8 +115,12 @@ func (ts *TitleScene) HandleEvent(event *sdl.Event) {
 }
 
 // Render renders the scene
-func (ts *TitleScene) Render(renderer *sdl.Renderer) error {
-	var err error
+func (ts *TitleScene) Render() error {
+	renderer, err := window.GetRenderer()
+	if err != nil {
+		return fmt.Errorf("Could not get renderer: %v", err)
+	}
+
 	if err = renderer.SetDrawColor(bgColor.R, bgColor.G, bgColor.B, bgColor.A); err != nil {
 		return fmt.Errorf("Could not set draw color: %v", err)
 	}
