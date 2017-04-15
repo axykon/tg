@@ -10,12 +10,18 @@ import (
 
 // MenuScene is the initial splash screen
 type MenuScene struct {
-	menu     []menuItem
-	labels   []*sdl.Texture
-	selected int
+	menu          []menuItem
+	labels        []*sdl.Texture
+	selected      int
+	marginsHeight int
+	labelHeight   int
 }
 
-const fontFile = "res/Go-Bold.ttf"
+const (
+	fontFile     = "res/Go-Bold.ttf"
+	fontSize     = 45
+	labelSpacing = 40
+)
 
 var (
 	bgColor  = sdl.Color{R: 30, G: 30, B: 30, A: 255}
@@ -40,12 +46,8 @@ func (ts *MenuScene) Init() (err error) {
 		err = renderer.SetRenderTarget(origTarget)
 	}()
 
-	var fontSize = 40
-
-	ts.menu = []menuItem{{"Play", "play"}, {"Options", "options"}, {"Quit", "quit"}}
+	ts.menu = []menuItem{{"Play", "play"}, {"Options", "options"}, {"Scores", "scores"}, {"Quit", "quit"}}
 	ts.labels = make([]*sdl.Texture, len(ts.menu))
-
-	log.Println("Font size:", fontSize)
 
 	font, err := ttf.OpenFont(fontFile, fontSize)
 	if err != nil {
@@ -53,7 +55,11 @@ func (ts *MenuScene) Init() (err error) {
 	}
 	defer font.Close()
 
-	log.Println("Font height:", font.Height())
+	ts.labelHeight = font.Height()
+	_, windowHeight := window.GetSize()
+	ts.marginsHeight = (windowHeight - (ts.labelHeight*len(ts.menu) + labelSpacing*(len(ts.menu)-1))) / 2
+
+	log.Printf("window: %d, label: %d, spacing: %d, margin: %d", windowHeight, ts.labelHeight, labelSpacing, ts.marginsHeight)
 
 	for i, item := range ts.menu {
 
@@ -122,13 +128,15 @@ func (ts *MenuScene) Render() error {
 	if err = renderer.SetDrawColor(bgColor.R, bgColor.G, bgColor.B, bgColor.A); err != nil {
 		return fmt.Errorf("Could not set draw color: %v", err)
 	}
+
 	if err = renderer.Clear(); err != nil {
 		return fmt.Errorf("Could not clear target: %v", err)
 	}
 
-	y := 0
+	y := ts.marginsHeight - labelSpacing
 
 	for i, t := range ts.labels {
+		y += labelSpacing
 		_, _, w, h, _ := t.Query()
 
 		var srcY int32
@@ -136,10 +144,11 @@ func (ts *MenuScene) Render() error {
 			srcY = h / 2
 		}
 
-		renderer.Copy(t, &sdl.Rect{X: 0, Y: srcY, W: w, H: h / 2}, &sdl.Rect{X: (int32(windowWidth) - w) / 2, Y: int32(y), W: w, H: h / 2})
+		renderer.Copy(t,
+			&sdl.Rect{X: 0, Y: srcY, W: w, H: int32(ts.labelHeight)},
+			&sdl.Rect{X: (int32(windowWidth) - w) / 2, Y: int32(y), W: w, H: int32(ts.labelHeight)})
 
-		y = y + int(h/2) // + 20
-
+		y += ts.labelHeight
 	}
 
 	return nil
