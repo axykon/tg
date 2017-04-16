@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/axykon/tg/menu"
 	"github.com/veandco/go-sdl2/sdl"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
@@ -26,7 +27,6 @@ var (
 
 func main() {
 	var err error
-	log.Print(bgColor)
 
 	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		log.Fatalf("Could not initialize SDL: %v\n", err)
@@ -54,7 +54,13 @@ func main() {
 		log.Fatalf("Could not create renderer: %v", err)
 	}
 
-	var t Scene = &MenuScene{}
+	font, err := ttf.OpenFont("res/menu.ttf", 40)
+	if err != nil {
+		log.Fatalf("Could not open font: %v", err)
+	}
+	defer font.Close()
+
+	var t Scene = menu.New(window, font, []menu.Item{{"Play", "play"}, {"Options", "options"}, {"Quit", "quit"}})
 	defer t.Destroy()
 	if err = t.Init(); err != nil {
 		log.Fatalf("Could not init menu scene: %v", err)
