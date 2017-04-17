@@ -2,7 +2,6 @@ package menu
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/veandco/go-sdl2/sdl"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
@@ -12,7 +11,7 @@ import (
 type Menu struct {
 	window        *sdl.Window
 	font          *ttf.Font
-	items         []Item
+	items         []item
 	labels        []*sdl.Texture
 	selected      int
 	marginsHeight int
@@ -31,15 +30,20 @@ var (
 	selColor = sdl.Color{R: 255, G: 255, B: 255, A: 255}
 )
 
-// Item - a menu item
-type Item struct {
-	Label  string
-	Action string
+// Item represents a menu item
+type item struct {
+	label  string
+	action func()
 }
 
 // New creates new menu with given items
-func New(window *sdl.Window, font *ttf.Font, items []Item) *Menu {
-	return &Menu{window: window, font: font, items: items}
+func New(window *sdl.Window, font *ttf.Font) *Menu {
+	return &Menu{window: window, font: font}
+}
+
+//Add adds new menu item
+func (m *Menu) Add(label string, action func()) {
+	m.items = append(m.items, item{label: label, action: action})
 }
 
 // Init initializes resources
@@ -73,7 +77,7 @@ func (m *Menu) HandleEvent(event *sdl.Event) {
 		} else if evt.Keysym.Sym == sdl.K_UP && m.selected > 0 {
 			m.selected--
 		} else if evt.Keysym.Sym == sdl.K_RETURN {
-			log.Printf("Action selected: %s", m.items[m.selected].Action)
+			m.items[m.selected].action()
 		}
 	}
 }
@@ -123,7 +127,7 @@ func (m *Menu) createLabel(i int, font *ttf.Font, renderer *sdl.Renderer) (resul
 
 	item := m.items[i]
 
-	surface, err := font.RenderUTF8_Blended(item.Label, fgColor)
+	surface, err := font.RenderUTF8_Blended(item.label, fgColor)
 	if err != nil {
 		return fmt.Errorf("Could not render font: %v", err)
 	}
@@ -136,7 +140,7 @@ func (m *Menu) createLabel(i int, font *ttf.Font, renderer *sdl.Renderer) (resul
 	}
 	defer texture.Destroy()
 
-	selSurface, err := font.RenderUTF8_Blended(item.Label, selColor)
+	selSurface, err := font.RenderUTF8_Blended(item.label, selColor)
 	if err != nil {
 		return fmt.Errorf("Could not render font: %v", err)
 	}

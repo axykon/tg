@@ -60,7 +60,10 @@ func main() {
 	}
 	defer font.Close()
 
-	var t Scene = menu.New(window, font, []menu.Item{{"Play", "play"}, {"Options", "options"}, {"Quit", "quit"}})
+	var t = menu.New(window, font)
+	t.Add("Play", func() { log.Print("Playing") })
+	t.Add("Quit", func() { os.Exit(0) })
+
 	defer t.Destroy()
 	if err = t.Init(); err != nil {
 		log.Fatalf("Could not init menu scene: %v", err)
