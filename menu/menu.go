@@ -19,8 +19,6 @@ type Menu struct {
 }
 
 const (
-	fontFile     = "res/Go-Bold.ttf"
-	fontSize     = 45
 	labelSpacing = 40
 )
 
