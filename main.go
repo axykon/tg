@@ -62,6 +62,7 @@ func main() {
 
 	var t = menu.New(window, font)
 	t.Add("Play", func() { log.Print("Playing") })
+	t.Add("Options", func() { log.Print("Options") })
 	t.Add("Quit", func() { os.Exit(0) })
 
 	defer t.Destroy()
