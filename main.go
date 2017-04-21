@@ -18,6 +18,7 @@ type Scene interface {
 	Init() error
 	Render() error
 	HandleEvent(event *sdl.Event)
+	Update() string
 	Destroy()
 }
 
@@ -60,15 +61,8 @@ func main() {
 	}
 	defer font.Close()
 
-	var t = menu.New(renderer, font, w, h)
-	t.Add("Play", func() { log.Print("Playing") })
-	t.Add("Options", func() { log.Print("Options") })
-	t.Add("Quit", func() { os.Exit(0) })
-
-	defer t.Destroy()
-	if err = t.Init(); err != nil {
-		log.Fatalf("Could not init menu scene: %v", err)
-	}
+	var currentScene Scene
+	var nextScene = "menu"
 
 loop:
 	for {
@@ -81,8 +75,34 @@ loop:
 				break loop
 			}
 		}
-		t.HandleEvent(&event)
-		if err = t.Render(); err != nil {
+
+		if currentScene != nil {
+			currentScene.HandleEvent(&event)
+			nextScene = currentScene.Update()
+		}
+
+		if nextScene != "" {
+			log.Printf("Next scene is %s", nextScene)
+			if currentScene != nil {
+				currentScene.Destroy()
+			}
+
+			switch nextScene {
+			case "menu":
+				m := menu.New(renderer, font, w, h)
+				m.Add("Play", "game")
+				m.Add("Options", "options")
+				m.Add("Quit", "exit")
+				currentScene = m
+			}
+
+			if err = currentScene.Init(); err != nil {
+				log.Fatalf("Could not init scene %s: %v", nextScene, err)
+			}
+			nextScene = ""
+
+		}
+		if err = currentScene.Render(); err != nil {
 			log.Fatalf("Could not render scene: %v", err)
 		}
 		renderer.Present()

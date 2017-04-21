@@ -18,6 +18,7 @@ type Menu struct {
 	selected      int
 	marginsHeight int
 	labelHeight   int
+	scene         string
 }
 
 const (
@@ -32,8 +33,8 @@ var (
 
 // Item represents a menu item
 type item struct {
-	label  string
-	action func()
+	label string
+	scene string
 }
 
 // New creates new menu with given items
@@ -42,8 +43,8 @@ func New(renderer *sdl.Renderer, font *ttf.Font, width int, height int) *Menu {
 }
 
 //Add adds new menu item
-func (m *Menu) Add(label string, action func()) {
-	m.items = append(m.items, item{label: label, action: action})
+func (m *Menu) Add(label string, scene string) {
+	m.items = append(m.items, item{label: label, scene: scene})
 }
 
 // Init initializes resources
@@ -70,9 +71,14 @@ func (m *Menu) HandleEvent(event *sdl.Event) {
 		} else if evt.Keysym.Sym == sdl.K_UP && m.selected > 0 {
 			m.selected--
 		} else if evt.Keysym.Sym == sdl.K_RETURN {
-			m.items[m.selected].action()
+			m.scene = m.items[m.selected].scene
 		}
 	}
+}
+
+//Update implements scene's logic
+func (m *Menu) Update() string {
+	return m.scene
 }
 
 // Render renders the scene
