@@ -60,7 +60,7 @@ func main() {
 	}
 	defer font.Close()
 
-	var t = menu.New(window, font)
+	var t = menu.New(renderer, font, w, h)
 	t.Add("Play", func() { log.Print("Playing") })
 	t.Add("Options", func() { log.Print("Options") })
 	t.Add("Quit", func() { os.Exit(0) })
@@ -93,7 +93,7 @@ func getWindowSize() (w int, h int, err error) {
 	if hostname, e := os.Hostname(); e != nil {
 		err = e
 	} else if strings.HasPrefix(hostname, "w") {
-		w, h = 200, 140
+		w, h = 300, 200
 	} else {
 		w, h = 800, 600
 	}

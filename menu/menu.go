@@ -9,7 +9,9 @@ import (
 
 // Menu is the initial splash screen
 type Menu struct {
-	window        *sdl.Window
+	renderer      *sdl.Renderer
+	width         int
+	height        int
 	font          *ttf.Font
 	items         []item
 	labels        []*sdl.Texture
@@ -19,7 +21,7 @@ type Menu struct {
 }
 
 const (
-	labelSpacing = 40
+	labelSpacing = 20
 )
 
 var (
@@ -35,8 +37,8 @@ type item struct {
 }
 
 // New creates new menu with given items
-func New(window *sdl.Window, font *ttf.Font) *Menu {
-	return &Menu{window: window, font: font}
+func New(renderer *sdl.Renderer, font *ttf.Font, width int, height int) *Menu {
+	return &Menu{renderer: renderer, font: font, width: width, height: height}
 }
 
 //Add adds new menu item
@@ -45,20 +47,13 @@ func (m *Menu) Add(label string, action func()) {
 }
 
 // Init initializes resources
-func (m *Menu) Init() (err error) {
-	renderer, err := m.window.GetRenderer()
-	if err != nil {
-		return fmt.Errorf("Could not get renderer: %v", err)
-	}
-
+func (m *Menu) Init() error {
 	m.labels = make([]*sdl.Texture, len(m.items))
-
 	m.labelHeight = m.font.Height()
-	_, windowHeight := m.window.GetSize()
-	m.marginsHeight = (windowHeight - (m.labelHeight*len(m.items) + labelSpacing*(len(m.items)-1))) / 2
+	m.marginsHeight = (m.height - (m.labelHeight*len(m.items) + labelSpacing*(len(m.items)-1))) / 2
 
 	for i := range m.items {
-		if err = m.createLabel(i, m.font, renderer); err != nil {
+		if err := m.createLabel(i, m.font, m.renderer); err != nil {
 			return fmt.Errorf("Could not create menu item: %v", err)
 		}
 	}
@@ -82,17 +77,12 @@ func (m *Menu) HandleEvent(event *sdl.Event) {
 
 // Render renders the scene
 func (m *Menu) Render() error {
-	renderer, err := m.window.GetRenderer()
-	windowWidth, _ := m.window.GetSize()
-	if err != nil {
-		return fmt.Errorf("Could not get renderer: %v", err)
-	}
-
-	if err = renderer.SetDrawColor(bgColor.R, bgColor.G, bgColor.B, bgColor.A); err != nil {
+	var err error
+	if err = m.renderer.SetDrawColor(bgColor.R, bgColor.G, bgColor.B, bgColor.A); err != nil {
 		return fmt.Errorf("Could not set draw color: %v", err)
 	}
 
-	if err = renderer.Clear(); err != nil {
+	if err = m.renderer.Clear(); err != nil {
 		return fmt.Errorf("Could not clear target: %v", err)
 	}
 
@@ -107,9 +97,9 @@ func (m *Menu) Render() error {
 			srcY = h / 2
 		}
 
-		renderer.Copy(t,
+		m.renderer.Copy(t,
 			&sdl.Rect{X: 0, Y: srcY, W: w, H: int32(m.labelHeight)},
-			&sdl.Rect{X: (int32(windowWidth) - w) / 2, Y: int32(y), W: w, H: int32(m.labelHeight)})
+			&sdl.Rect{X: (int32(m.width) - w) / 2, Y: int32(y), W: w, H: int32(m.labelHeight)})
 
 		y += m.labelHeight
 	}
