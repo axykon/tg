@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/axykon/tg/game"
 	"github.com/axykon/tg/menu"
 	"github.com/veandco/go-sdl2/sdl"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
@@ -38,7 +39,7 @@ func main() {
 		log.Fatalf("Could not initialize SDL_ttf: %v\n", err)
 	}
 
-	w, h, err := getWindowSize()
+	w, h, err := calcWindowSize()
 	if err != nil {
 		log.Fatalf("Could not get window size: %v", err)
 	}
@@ -85,15 +86,20 @@ loop:
 			log.Printf("Next scene is %s", nextScene)
 			if currentScene != nil {
 				currentScene.Destroy()
+				currentScene = nil
 			}
 
 			switch nextScene {
 			case "menu":
 				m := menu.New(renderer, font, w, h)
 				m.Add("Play", "game")
-				m.Add("Options", "options")
 				m.Add("Quit", "exit")
 				currentScene = m
+			case "game":
+				g := game.New(renderer, w, h)
+				currentScene = g
+			case "exit":
+				break loop
 			}
 
 			if err = currentScene.Init(); err != nil {
@@ -109,7 +115,7 @@ loop:
 	}
 }
 
-func getWindowSize() (w int, h int, err error) {
+func calcWindowSize() (w int, h int, err error) {
 	if hostname, e := os.Hostname(); e != nil {
 		err = e
 	} else if strings.HasPrefix(hostname, "w") {
