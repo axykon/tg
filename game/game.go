@@ -12,13 +12,13 @@ type Game struct {
 	renderer  *sdl.Renderer
 	width     int
 	height    int
-	mutex     *sync.Mutex
+	mutex     *sync.RWMutex
 	nextScene string
 }
 
 // New creates the new game
 func New(renderer *sdl.Renderer, width int, height int) *Game {
-	g := &Game{renderer: renderer, width: width, height: height, mutex: &sync.Mutex{}}
+	g := &Game{renderer: renderer, width: width, height: height, mutex: &sync.RWMutex{}}
 	timer := time.NewTimer(time.Second * 5)
 	go func() {
 		<-timer.C
@@ -51,8 +51,8 @@ func (g *Game) HandleEvent(event *sdl.Event) {
 
 // Update updates the game logic
 func (g *Game) Update() string {
-	g.mutex.Lock()
-	defer g.mutex.Unlock()
+	g.mutex.RLock()
+	defer g.mutex.RUnlock()
 	return g.nextScene
 }
 
