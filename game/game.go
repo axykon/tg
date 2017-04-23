@@ -1,10 +1,12 @@
 package game
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
+	image "github.com/veandco/go-sdl2/sdl_image"
 )
 
 // Game is the main scene
@@ -14,6 +16,7 @@ type Game struct {
 	height    int
 	mutex     *sync.RWMutex
 	nextScene string
+	grass     *sdl.Texture
 }
 
 // New creates the new game
@@ -31,16 +34,29 @@ func New(renderer *sdl.Renderer, width int, height int) *Game {
 
 // Init initializes the game
 func (g *Game) Init() error {
+	if mask := image.Init(image.INIT_PNG); mask == 0 {
+		return fmt.Errorf("PNG format is not supported")
+	}
+	defer image.Quit()
+
+	var err error
+	if g.grass, err = image.LoadTexture(g.renderer, "res/grass.png"); err != nil {
+		return fmt.Errorf("Could not load grass resource: %v", err)
+	}
+
 	return nil
 }
 
 // Render renders the game
 func (g *Game) Render() error {
-	g.renderer.SetDrawColor(255, 255, 0, 128)
+	g.renderer.SetDrawColor(0, 0, 255, 128)
 	g.renderer.Clear()
 
-	g.renderer.SetDrawColor(0, 255, 0, 255)
-	g.renderer.FillRect(&sdl.Rect{X: 20, Y: 20, W: int32(g.width) - 40, H: int32(g.height) - 40})
+	const grassHeight = 50
+
+	for x := 0; x < g.width; x += 240 {
+		g.renderer.Copy(g.grass, nil, &sdl.Rect{X: int32(x), Y: int32(g.height) - grassHeight, W: 322, H: grassHeight})
+	}
 	return nil
 }
 
@@ -58,4 +74,5 @@ func (g *Game) Update() string {
 
 // Destroy releases resorces
 func (g *Game) Destroy() {
+	g.grass.Destroy()
 }
