@@ -119,7 +119,7 @@ func calcWindowSize() (w int, h int, err error) {
 	if hostname, e := os.Hostname(); e != nil {
 		err = e
 	} else if strings.HasPrefix(hostname, "w") {
-		w, h = 300, 200
+		w, h = 400, 250
 	} else {
 		w, h = 800, 600
 	}

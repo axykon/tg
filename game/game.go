@@ -17,6 +17,7 @@ type Game struct {
 	mutex     *sync.RWMutex
 	nextScene string
 	grass     *sdl.Texture
+	grassX    int
 }
 
 // New creates the new game
@@ -52,9 +53,10 @@ func (g *Game) Render() error {
 	g.renderer.SetDrawColor(0, 0, 255, 128)
 	g.renderer.Clear()
 
-	const grassHeight = 50
+	const grassHeight = 100 / 2
+	const grassWidth = 480 / 2
 
-	for x := 0; x < g.width; x += 240 {
+	for x := g.grassX; x < g.width; x += grassWidth {
 		g.renderer.Copy(g.grass, nil, &sdl.Rect{X: int32(x), Y: int32(g.height) - grassHeight, W: 322, H: grassHeight})
 	}
 	return nil
@@ -67,6 +69,11 @@ func (g *Game) HandleEvent(event *sdl.Event) {
 
 // Update updates the game logic
 func (g *Game) Update() string {
+	g.grassX--
+	if g.grassX < -g.width {
+		g.grassX = 0
+	}
+
 	g.mutex.RLock()
 	defer g.mutex.RUnlock()
 	return g.nextScene
