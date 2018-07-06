@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/veandco/go-sdl2/sdl"
-	ttf "github.com/veandco/go-sdl2/sdl_ttf"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
 // Menu is the initial splash screen
@@ -65,7 +65,7 @@ func (m *Menu) Init() error {
 // HandleEvent handles events
 func (m *Menu) HandleEvent(event *sdl.Event) {
 	switch evt := (*event).(type) {
-	case *sdl.KeyDownEvent:
+	case *sdl.KeyboardEvent:
 		if evt.Keysym.Sym == sdl.K_DOWN && m.selected < len(m.items)-1 {
 			m.selected++
 		} else if evt.Keysym.Sym == sdl.K_UP && m.selected > 0 {
@@ -121,7 +121,7 @@ func (m *Menu) createLabel(i int, font *ttf.Font, renderer *sdl.Renderer) (resul
 
 	item := m.items[i]
 
-	surface, err := font.RenderUTF8_Blended(item.label, fgColor)
+	surface, err := font.RenderUTF8Blended(item.label, fgColor)
 	if err != nil {
 		return fmt.Errorf("Could not render font: %v", err)
 	}
@@ -134,7 +134,7 @@ func (m *Menu) createLabel(i int, font *ttf.Font, renderer *sdl.Renderer) (resul
 	}
 	defer texture.Destroy()
 
-	selSurface, err := font.RenderUTF8_Blended(item.label, selColor)
+	selSurface, err := font.RenderUTF8Blended(item.label, selColor)
 	if err != nil {
 		return fmt.Errorf("Could not render font: %v", err)
 	}
@@ -147,7 +147,7 @@ func (m *Menu) createLabel(i int, font *ttf.Font, renderer *sdl.Renderer) (resul
 	defer selTexture.Destroy()
 
 	m.labels[i], err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET,
-		int(surface.W), m.labelHeight*2)
+		int32(surface.W), int32(m.labelHeight*2))
 	renderer.SetRenderTarget(m.labels[i])
 	renderer.SetDrawColor(bgColor.R, bgColor.G, bgColor.B, bgColor.A)
 	renderer.Clear()

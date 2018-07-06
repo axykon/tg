@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	image "github.com/veandco/go-sdl2/img"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -35,13 +35,13 @@ func New(renderer *sdl.Renderer, width int, height int) *Game {
 
 // Init initializes the game
 func (g *Game) Init() error {
-	if mask := image.Init(image.INIT_PNG); mask == 0 {
+	if mask := img.Init(img.INIT_PNG); mask == 0 {
 		return fmt.Errorf("PNG format is not supported")
 	}
-	defer image.Quit()
+	defer img.Quit()
 
 	var err error
-	if g.grass, err = image.LoadTexture(g.renderer, "res/grass.png"); err != nil {
+	if g.grass, err = img.LoadTexture(g.renderer, "res/grass.png"); err != nil {
 		return fmt.Errorf("Could not load grass resource: %v", err)
 	}
 

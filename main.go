@@ -8,13 +8,14 @@ import (
 	"github.com/axykon/tg/game"
 	"github.com/axykon/tg/menu"
 	"github.com/veandco/go-sdl2/sdl"
-	ttf "github.com/veandco/go-sdl2/sdl_ttf"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
 const (
 	windowTitle = "Tank & Gun"
 )
 
+// Scene is an abstract scene which can be rendered on the screen
 type Scene interface {
 	Init() error
 	Render() error
@@ -45,7 +46,7 @@ func main() {
 	}
 
 	window, err = sdl.CreateWindow(windowTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		w, h, sdl.WINDOW_SHOWN)
+		int32(w), int32(h), sdl.WINDOW_SHOWN)
 	if err != nil {
 		log.Fatalf("Could not create window: %v\n", err)
 	}
@@ -71,7 +72,7 @@ loop:
 		switch event := event.(type) {
 		case *sdl.QuitEvent:
 			break loop
-		case *sdl.KeyDownEvent:
+		case *sdl.KeyboardEvent:
 			if event.Keysym.Sym == sdl.K_ESCAPE || event.Keysym.Sym == 'q' {
 				break loop
 			}
